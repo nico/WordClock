@@ -40,21 +40,57 @@ public class WordClockService extends CanvasWatchFaceService {
         public void onCreate(SurfaceHolder holder) {
             super.onCreate(holder);
             mTime = new Time();
+            /*
+            XXX play with this
+            setWatchFaceStyle(new WatchFaceStyle.Builder(AnalogWatchFaceService.this)
+            .setCardPeekMode(WatchFaceStyle.PEEK_MODE_SHORT)
+            .setBackgroundVisibility(WatchFaceStyle
+                                    .BACKGROUND_VISIBILITY_INTERRUPTIVE)
+            .setShowSystemUiTime(false)
+            .build());
+             */
         }
 
         @Override
         public void onPropertiesChanged(Bundle properties) {
-            /* get device features (burn-in, low-bit ambient) */
+            super.onPropertiesChanged(properties);
+            // "For devices that use low-bit ambient mode, the screen supports fewer bits for each
+            // color in ambient mode, so you should disable anti-aliasing."
+            mLowBitAmbient = properties.getBoolean(PROPERTY_LOW_BIT_AMBIENT, false);
+            // XXX
+            // "For devices that require burn-in protection, avoid using large blocks of
+            // white pixels in ambient mode and do not place content within 10 pixels of the
+            // edge of the screen, since the system shifts the content periodically
+            // to avoid pixel burn-in."
+            //mBurnInProtection = properties.getBoolean(PROPERTY_BURN_IN_PROTECTION,
+            //        false);
         }
 
         @Override
         public void onTimeTick() {
-            /* the time changed */
+            super.onTimeTick();
+
+            // XXX enough to do this every 5 min
+            invalidate();
         }
 
         @Override
         public void onAmbientModeChanged(boolean inAmbientMode) {
-            /* the wearable switched between modes */
+            boolean wasInAmbientMode = isInAmbientMode();
+            super.onAmbientModeChanged(inAmbientMode);
+
+            // XXX
+            if (inAmbientMode != wasInAmbientMode) {
+                if (mLowBitAmbient) {
+                    boolean antiAlias = !inAmbientMode;
+                    //mHourPaint.setAntiAlias(antiAlias);
+                    //mMinutePaint.setAntiAlias(antiAlias);
+                    //mSecondPaint.setAntiAlias(antiAlias);
+                    //mTickPaint.setAntiAlias(antiAlias);
+                }
+                invalidate();
+                //updateTimer();
+            }
         }
 
         @Override
