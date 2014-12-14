@@ -4,10 +4,8 @@
 
     <uses-feature android:name="android.hardware.type.watch" />
 
-    <uses-permission
-        android:name="com.google.android.permission.PROVIDE_BACKGROUND" />
-    <uses-permission
-        android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="com.google.android.permission.PROVIDE_BACKGROUND" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
 
     <application
         android:allowBackup="true"
@@ -23,6 +21,28 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <!-- XXX label etc, see https://developer.android.com/training/wearables/watch-faces/service.html -->
+        <service
+            android:name=".WordClockService"
+            android:enabled="true"
+            android:exported="true" >
+            <meta-data
+                android:name="android.service.wallpaper"
+                android:resource="@xml/watch_face" />
+            <!--<meta-data
+                android:name="com.google.android.wearable.watchface.preview"
+                android:resource="@drawable/preview_word_clock" />
+            <meta-data
+                android:name="com.google.android.wearable.watchface.preview_circular"
+                android:resource="@drawable/preview_word_clock_circular" />-->
+            <intent-filter>
+                <action android:name="android.service.wallpaper.WallpaperService" />
+                <category
+                    android:name=
+                        "com.google.android.wearable.watchface.category.WATCH_FACE" />
+            </intent-filter>
+        </service>
     </application>
 
 </manifest>
