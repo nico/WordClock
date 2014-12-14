@@ -4,5 +4,6 @@
     <string name="app_name">Word Clock</string>
     <string name="hello_round">Hello Round World!</string>
     <string name="hello_square">Hello Square World!</string>
+    <string name="word_clock_name">Word Clock</string>
 
 </resources>

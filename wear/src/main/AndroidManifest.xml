@@ -22,14 +22,16 @@
             </intent-filter>
         </activity>
 
-        <!-- XXX label etc, see https://developer.android.com/training/wearables/watch-faces/service.html -->
         <service
             android:name=".WordClockService"
-            android:enabled="true"
-            android:exported="true" >
+            android:label="@string/word_clock_name"
+            android:allowEmbedded="true"
+            android:taskAffinity=""
+            android:permission="android.permission.BIND_WALLPAPER" >
             <meta-data
                 android:name="android.service.wallpaper"
                 android:resource="@xml/watch_face" />
+            <!-- XXX take screenshots and add this when done: -->
             <!--<meta-data
                 android:name="com.google.android.wearable.watchface.preview"
                 android:resource="@drawable/preview_word_clock" />
