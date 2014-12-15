@@ -188,6 +188,7 @@ public class WordClockService extends CanvasWatchFaceService {
 
         @Override
         public void onDraw(Canvas canvas, Rect bounds) {
+            // XXX: early return if nothing changed; a real paint is only needed every 5 minutes.
             mTime.setToNow();
 
             // After this, mTime.minute will be 0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, or 55.
