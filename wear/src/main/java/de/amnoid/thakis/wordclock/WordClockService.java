@@ -224,22 +224,28 @@ public class WordClockService extends CanvasWatchFaceService {
             else
                 mask |= ONE << (mTime.hour - 1);
 
-            // XXX docs say this, which is incorrect:
-            //if (!mAmbient) {
-            if (!isInAmbientMode()) {
-                // XXX draw grey text thingies
-            }
-
+            // Draw the background first, and then the active time on top of it.
             int x = 20;
             int y = 80;
-            //for (int i = 0; i < lines.length; i++, y += 0.5*textPaint.getFontSpacing())
-            //    canvas.drawText(lines[i], x, y, textPaint);
+            if (!isInAmbientMode()) {
+                for (int i = 0; i < words.length; i++) {
+                    if ((mask & (1 << i)) != 0) continue;
+                    canvas.drawText(
+                            words[i],
+                            x + xCoords[i],
+                            (int) (y + yCoords[i] * 0.5 * lightPaint.getFontSpacing()),
+                            darkPaint);
+                }
+            }
+
             for (int i = 0; i < words.length; i++) {
+                if ((mask & (1 << i)) == 0) continue;
+
                 canvas.drawText(
                         words[i],
                         x + xCoords[i],
                         (int) (y + yCoords[i] * 0.5 * lightPaint.getFontSpacing()),
-                        (mask & (1 << i)) != 0 ? lightPaint : darkPaint);
+                        lightPaint);
             }
         }
 
