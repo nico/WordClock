@@ -94,7 +94,7 @@ public class WordClockService extends CanvasWatchFaceService {
                     .setBackgroundVisibility(WatchFaceStyle
                             .BACKGROUND_VISIBILITY_INTERRUPTIVE)
                     .setStatusBarGravity(Gravity.RIGHT | Gravity.TOP)
-                    .setShowSystemUiTime(true)
+                    .setShowSystemUiTime(false)
                     .build());
         }
 
@@ -213,9 +213,12 @@ public class WordClockService extends CanvasWatchFaceService {
             else
                 mask |= ONE << (mTime.hour - 1);
 
+            // Clear background.
+            canvas.drawColor(Color.BLACK);
+
             // Draw the background first, and then the active time on top of it.
             int x = 20;
-            int y = 80;
+            int y = 70;
             if (!isInAmbientMode()) {
                 for (int i = 0; i < words.length; i++) {
                     if ((mask & (1 << i)) != 0) continue;
