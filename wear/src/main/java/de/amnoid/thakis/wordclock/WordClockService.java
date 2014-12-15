@@ -194,11 +194,11 @@ public class WordClockService extends CanvasWatchFaceService {
             } else if (mTime.minute != 0)
                 mask |= PAST;
             switch (mTime.minute) {
-                case 5: mask |= FIVE_H; break;
-                case 10: mask |= TEN_H; break;
+                case 5: mask |= FIVE_H | MINUTES; break;
+                case 10: mask |= TEN_H | MINUTES; break;
                 case 15: mask |= QUARTER; break;
-                case 20: mask |= TWENTY_H; break;
-                case 25: mask |= TWENTY_H | FIVE_H; break;
+                case 20: mask |= TWENTY_H | MINUTES; break;
+                case 25: mask |= TWENTY_H | FIVE_H | MINUTES; break;
                 case 30: mask |= HALF; break;
             }
 
