@@ -22,10 +22,10 @@
             <meta-data
                 android:name="android.service.wallpaper"
                 android:resource="@xml/watch_face" />
-            <!-- XXX take screenshots and add this when done: -->
             <meta-data
                 android:name="com.google.android.wearable.watchface.preview"
                 android:resource="@drawable/preview_word_clock" />
+            <!-- XXX add circular screenshot once circular layout is done -->
             <!--
             <meta-data
                 android:name="com.google.android.wearable.watchface.preview_circular"
