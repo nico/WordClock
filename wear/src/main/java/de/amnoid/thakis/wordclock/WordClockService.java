@@ -19,9 +19,6 @@ import android.view.SurfaceHolder;
 import java.util.TimeZone;
 
 public class WordClockService extends CanvasWatchFaceService {
-    public WordClockService() {
-    }
-
     @Override
     public Engine onCreateEngine() {
         return new Engine();
@@ -74,12 +71,9 @@ public class WordClockService extends CanvasWatchFaceService {
             super.onCreate(holder);
             mTime = new Time();
 
-            //Typeface font = Typeface.create("Roboto", Typeface.DEFAULT);
             mLightPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
             mLightPaint.setColor(Color.WHITE);
             mLightPaint.setTextSize(36f);
-            //textPaint.setTypeface(font);
-            //textPaint.setTypeface(Typeface.MONOSPACE);
             mLightPaint.setTypeface(Typeface.DEFAULT_BOLD);
 
             for (int i = 1; i < words.length; ++i) {
@@ -179,7 +173,6 @@ public class WordClockService extends CanvasWatchFaceService {
                 "nine ten eleven",
                 "twelve am pm",
         };
-
 
         @Override
         public void onDraw(Canvas canvas, Rect bounds) {
