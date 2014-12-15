@@ -54,8 +54,8 @@ public class WordClockService extends CanvasWatchFaceService {
 
     /* implement service callback methods */
     private class Engine extends CanvasWatchFaceService.Engine {
-        Time mTime;
-        boolean mLowBitAmbient;
+        private Time mTime;
+        private boolean mLowBitAmbient;
 
         boolean mRegisteredTimeZoneReceiver = false;
         final BroadcastReceiver mTimeZoneReceiver = new BroadcastReceiver() {
@@ -66,9 +66,8 @@ public class WordClockService extends CanvasWatchFaceService {
             }
         };
 
-        Paint lightPaint;
-        Paint darkPaint;
-
+        private Paint mLightPaint;
+        private Paint mDarkPaint;
 
         @Override
         public void onCreate(SurfaceHolder holder) {
@@ -76,12 +75,12 @@ public class WordClockService extends CanvasWatchFaceService {
             mTime = new Time();
 
             //Typeface font = Typeface.create("Roboto", Typeface.DEFAULT);
-            lightPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-            lightPaint.setColor(Color.WHITE);
-            lightPaint.setTextSize(36f);
+            mLightPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+            mLightPaint.setColor(Color.WHITE);
+            mLightPaint.setTextSize(36f);
             //textPaint.setTypeface(font);
             //textPaint.setTypeface(Typeface.MONOSPACE);
-            lightPaint.setTypeface(Typeface.DEFAULT_BOLD);
+            mLightPaint.setTypeface(Typeface.DEFAULT_BOLD);
 
             for (int i = 1; i < words.length; ++i) {
                 if (yCoords[i] != yCoords[i - 1])
@@ -89,11 +88,11 @@ public class WordClockService extends CanvasWatchFaceService {
 
                 int index = lines[yCoords[i]].indexOf(words[i]);
                 xCoords[i] = Math.round(
-                        lightPaint.measureText(lines[yCoords[i]], 0, index));
+                        mLightPaint.measureText(lines[yCoords[i]], 0, index));
             }
 
-            darkPaint = new Paint(lightPaint);
-            darkPaint.setColor(Color.DKGRAY);
+            mDarkPaint = new Paint(mLightPaint);
+            mDarkPaint.setColor(Color.DKGRAY);
 
             // XXX this is ignored? at least in the emulator
             setWatchFaceStyle(new WatchFaceStyle.Builder(WordClockService.this)
@@ -133,17 +132,13 @@ public class WordClockService extends CanvasWatchFaceService {
             boolean wasInAmbientMode = isInAmbientMode();
             super.onAmbientModeChanged(inAmbientMode);
 
-            // XXX
             if (inAmbientMode != wasInAmbientMode) {
                 if (mLowBitAmbient) {
                     boolean antiAlias = !inAmbientMode;
-                    //mHourPaint.setAntiAlias(antiAlias);
-                    //mMinutePaint.setAntiAlias(antiAlias);
-                    //mSecondPaint.setAntiAlias(antiAlias);
-                    //mTickPaint.setAntiAlias(antiAlias);
+                    mLightPaint.setAntiAlias(antiAlias);
+                    mDarkPaint.setAntiAlias(antiAlias);
                 }
                 invalidate();
-                //updateTimer();
             }
         }
 
@@ -234,8 +229,8 @@ public class WordClockService extends CanvasWatchFaceService {
                     canvas.drawText(
                             words[i],
                             x + xCoords[i],
-                            (int) (y + yCoords[i] * 0.5 * lightPaint.getFontSpacing()),
-                            darkPaint);
+                            (int) (y + yCoords[i] * 0.5 * mLightPaint.getFontSpacing()),
+                            mDarkPaint);
                 }
             }
 
@@ -245,8 +240,8 @@ public class WordClockService extends CanvasWatchFaceService {
                 canvas.drawText(
                         words[i],
                         x + xCoords[i],
-                        (int) (y + yCoords[i] * 0.5 * lightPaint.getFontSpacing()),
-                        lightPaint);
+                        (int) (y + yCoords[i] * 0.5 * mLightPaint.getFontSpacing()),
+                        mLightPaint);
             }
         }
 
