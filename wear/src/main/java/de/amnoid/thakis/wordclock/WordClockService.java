@@ -65,17 +65,24 @@ public class WordClockService extends CanvasWatchFaceService {
 
         private Paint mLightPaint;
         private Paint mDarkPaint;
+        private int mTextWidth, mTextHeight;
+        private double mLineHeight;
 
         @Override
         public void onCreate(SurfaceHolder holder) {
             super.onCreate(holder);
             mTime = new Time();
 
+            // Set up paints.
             mLightPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
             mLightPaint.setColor(Color.WHITE);
             mLightPaint.setTextSize(36f);
             mLightPaint.setTypeface(Typeface.DEFAULT_BOLD);
 
+            mDarkPaint = new Paint(mLightPaint);
+            mDarkPaint.setColor(Color.DKGRAY);
+
+            // Figure out x and y coords of each word.
             for (int i = 1; i < words.length; ++i) {
                 if (yCoords[i] != yCoords[i - 1])
                     continue;  // First word on line.
@@ -84,17 +91,24 @@ public class WordClockService extends CanvasWatchFaceService {
                 xCoords[i] = Math.round(
                         mLightPaint.measureText(lines[yCoords[i]], 0, index));
             }
+            mLineHeight = 0.5 * mLightPaint.getFontSpacing();
+            for (int i = 0; i < words.length; i++) {
+                yCoords[i] = (int)Math.round(yCoords[i] * mLineHeight);
+            }
 
-            mDarkPaint = new Paint(mLightPaint);
-            mDarkPaint.setColor(Color.DKGRAY);
+            // Measure size of the whole text block.
+            for (int i = 0; i < lines.length; ++i)
+                mTextWidth = Math.max(mTextWidth, Math.round(mLightPaint.measureText(lines[i])));
+            mTextHeight = (int)Math.round(lines.length * mLineHeight);
 
+            // Set up system UI stuff.
             // This seems to be ignored in the emulator, but seems to mostly works on the device.
             setWatchFaceStyle(new WatchFaceStyle.Builder(WordClockService.this)
                     .setCardPeekMode(WatchFaceStyle.PEEK_MODE_SHORT)
                     .setBackgroundVisibility(WatchFaceStyle
                             .BACKGROUND_VISIBILITY_INTERRUPTIVE)
-                    .setStatusBarGravity(Gravity.RIGHT | Gravity.TOP)
-                    .setHotwordIndicatorGravity(Gravity.RIGHT | Gravity.BOTTOM)
+                    .setStatusBarGravity(Gravity.END | Gravity.TOP)
+                    .setHotwordIndicatorGravity(Gravity.END | Gravity.BOTTOM)
                     .setShowSystemUiTime(false)
                     .build());
         }
@@ -132,6 +146,7 @@ public class WordClockService extends CanvasWatchFaceService {
                     boolean antiAlias = !inAmbientMode;
                     mLightPaint.setAntiAlias(antiAlias);
                     mDarkPaint.setAntiAlias(antiAlias);
+                    // XXX switch to outline painting on burn-in devices
                 }
                 invalidate();
             }
@@ -218,27 +233,21 @@ public class WordClockService extends CanvasWatchFaceService {
             canvas.drawColor(Color.BLACK);
 
             // Draw the background first, and then the active time on top of it.
-            int x = 20;
-            int y = 70;
+            int x = (canvas.getWidth() - mTextWidth) / 2;
+            int y = (canvas.getHeight() - mTextHeight) / 2
+                    + (int)Math.round(mLineHeight);
             if (!isInAmbientMode()) {
                 for (int i = 0; i < words.length; i++) {
                     if ((mask & (1 << i)) != 0) continue;
-                    canvas.drawText(
-                            words[i],
-                            x + xCoords[i],
-                            (int) (y + yCoords[i] * 0.5 * mLightPaint.getFontSpacing()),
-                            mDarkPaint);
+
+                    canvas.drawText( words[i], x + xCoords[i], y + yCoords[i], mDarkPaint);
                 }
             }
 
             for (int i = 0; i < words.length; i++) {
                 if ((mask & (1 << i)) == 0) continue;
 
-                canvas.drawText(
-                        words[i],
-                        x + xCoords[i],
-                        (int) (y + yCoords[i] * 0.5 * mLightPaint.getFontSpacing()),
-                        mLightPaint);
+                canvas.drawText(words[i], x + xCoords[i], y + yCoords[i], mLightPaint);
             }
         }
 
