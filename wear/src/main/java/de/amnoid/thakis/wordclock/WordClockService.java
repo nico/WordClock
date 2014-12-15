@@ -53,6 +53,7 @@ public class WordClockService extends CanvasWatchFaceService {
     private class Engine extends CanvasWatchFaceService.Engine {
         private Time mTime;
         private boolean mLowBitAmbient;
+        private boolean mBurnInProtection;
 
         boolean mRegisteredTimeZoneReceiver = false;
         final BroadcastReceiver mTimeZoneReceiver = new BroadcastReceiver() {
@@ -119,13 +120,11 @@ public class WordClockService extends CanvasWatchFaceService {
             // "For devices that use low-bit ambient mode, the screen supports fewer bits for each
             // color in ambient mode, so you should disable anti-aliasing."
             mLowBitAmbient = properties.getBoolean(PROPERTY_LOW_BIT_AMBIENT, false);
-            // XXX
             // "For devices that require burn-in protection, avoid using large blocks of
             // white pixels in ambient mode and do not place content within 10 pixels of the
             // edge of the screen, since the system shifts the content periodically
             // to avoid pixel burn-in."
-            //mBurnInProtection = properties.getBoolean(PROPERTY_BURN_IN_PROTECTION,
-            //        false);
+            mBurnInProtection = properties.getBoolean(PROPERTY_BURN_IN_PROTECTION, false);
         }
 
         @Override
@@ -146,7 +145,11 @@ public class WordClockService extends CanvasWatchFaceService {
                     boolean antiAlias = !inAmbientMode;
                     mLightPaint.setAntiAlias(antiAlias);
                     mDarkPaint.setAntiAlias(antiAlias);
-                    // XXX switch to outline painting on burn-in devices
+                }
+                if (mBurnInProtection) {
+                    boolean fill = !inAmbientMode;
+                    mLightPaint.setStyle(fill ? Paint.Style.FILL : Paint.Style.STROKE);
+                    mDarkPaint.setStyle(fill ? Paint.Style.FILL : Paint.Style.STROKE);
                 }
                 invalidate();
             }
