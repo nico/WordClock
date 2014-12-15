@@ -32,9 +32,10 @@
                 android:name="android.service.wallpaper"
                 android:resource="@xml/watch_face" />
             <!-- XXX take screenshots and add this when done: -->
-            <!--<meta-data
+            <meta-data
                 android:name="com.google.android.wearable.watchface.preview"
                 android:resource="@drawable/preview_word_clock" />
+            <!--
             <meta-data
                 android:name="com.google.android.wearable.watchface.preview_circular"
                 android:resource="@drawable/preview_word_clock_circular" />-->
