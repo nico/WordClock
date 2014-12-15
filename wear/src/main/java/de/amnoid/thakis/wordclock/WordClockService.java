@@ -8,9 +8,12 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.wearable.watchface.CanvasWatchFaceService;
+import android.support.wearable.watchface.WatchFaceStyle;
 import android.text.format.Time;
+import android.view.Gravity;
 import android.view.SurfaceHolder;
 
 import java.util.TimeZone;
@@ -23,6 +26,31 @@ public class WordClockService extends CanvasWatchFaceService {
     public Engine onCreateEngine() {
         return new Engine();
     }
+
+    private static int IT = 1 << 0;
+    private static int IS = 1 << 1;
+    private static int HALF = 1 << 2;
+    private static int TEN_H = 1 << 3;
+    private static int QUARTER = 1 << 4;
+    private static int TWENTY_H = 1 << 5;
+    private static int FIVE_H = 1 << 6;
+    private static int MINUTES = 1 << 7;
+    private static int TO = 1 << 8;
+    private static int PAST = 1 << 9;
+    private static int ONE = 1 << 10;
+    private static int THREE = 1 << 11;
+    private static int TWO = 1 << 12;
+    private static int FOUR = 1 << 13;
+    private static int FIVE = 1 << 14;
+    private static int SIX = 1 << 15;
+    private static int SEVEN = 1 << 16;
+    private static int EIGHT = 1 << 17;
+    private static int NINE = 1 << 18;
+    private static int TEN = 1 << 19;
+    private static int ELEVEN = 1 << 2;
+    private static int TWELVE = 1 << 21;
+    private static int AM = 1 << 22;
+    private static int PM = 1 << 23;
 
     /* implement service callback methods */
     private class Engine extends CanvasWatchFaceService.Engine {
@@ -38,24 +66,43 @@ public class WordClockService extends CanvasWatchFaceService {
             }
         };
 
-        Paint textPaint;
+        Paint lightPaint;
+        Paint darkPaint;
+
 
         @Override
         public void onCreate(SurfaceHolder holder) {
             super.onCreate(holder);
             mTime = new Time();
 
-            textPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-            textPaint.setColor(Color.WHITE);
-            /*
-            XXX play with this
-            setWatchFaceStyle(new WatchFaceStyle.Builder(AnalogWatchFaceService.this)
-            .setCardPeekMode(WatchFaceStyle.PEEK_MODE_SHORT)
-            .setBackgroundVisibility(WatchFaceStyle
-                                    .BACKGROUND_VISIBILITY_INTERRUPTIVE)
-            .setShowSystemUiTime(false)
-            .build());
-             */
+            //Typeface font = Typeface.create("Roboto", Typeface.DEFAULT);
+            lightPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+            lightPaint.setColor(Color.WHITE);
+            lightPaint.setTextSize(36f);
+            //textPaint.setTypeface(font);
+            //textPaint.setTypeface(Typeface.MONOSPACE);
+            lightPaint.setTypeface(Typeface.DEFAULT_BOLD);
+
+            for (int i = 1; i < words.length; ++i) {
+                if (yCoords[i] != yCoords[i - 1])
+                    continue;  // First word on line.
+
+                int index = lines[yCoords[i]].indexOf(words[i]);
+                xCoords[i] = Math.round(
+                        lightPaint.measureText(lines[yCoords[i]], 0, index));
+            }
+
+            darkPaint = new Paint(lightPaint);
+            darkPaint.setColor(Color.DKGRAY);
+
+            // XXX this is ignored? at least in the emulator
+            setWatchFaceStyle(new WatchFaceStyle.Builder(WordClockService.this)
+                    .setCardPeekMode(WatchFaceStyle.PEEK_MODE_SHORT)
+                    .setBackgroundVisibility(WatchFaceStyle
+                            .BACKGROUND_VISIBILITY_INTERRUPTIVE)
+                    .setStatusBarGravity(Gravity.RIGHT | Gravity.TOP)
+                    .setShowSystemUiTime(true)
+                    .build());
         }
 
         @Override
@@ -71,9 +118,6 @@ public class WordClockService extends CanvasWatchFaceService {
             // to avoid pixel burn-in."
             //mBurnInProtection = properties.getBoolean(PROPERTY_BURN_IN_PROTECTION,
             //        false);
-            // XXX setStatusBarGravity() ?
-            // XXX setHotwordIndicatorGravity() ?
-            // XXX setViewProtection() ?
         }
 
         @Override
@@ -103,9 +147,100 @@ public class WordClockService extends CanvasWatchFaceService {
             }
         }
 
+        String[] words = new String[] {
+                "it", "is", "half", "ten",
+                "quarter", "twenty",
+                "five", "minutes", "to",
+                "past", "one", "three",
+                "two", "four", "five",
+                "six", "seven", "eight",
+                "nine", "ten", "eleven",
+                "twelve", "am", "pm"};
+        int[] xCoords = new int[] {  // Filled in by onCreate().
+                0, 0, 0, 0,
+                0, 0,
+                0, 0, 0,
+                0, 0, 0,  // "past"...
+                0, 0, 0,
+                0, 0, 0,
+                0, 0, 0,
+                0, 0, 0};
+        int[] yCoords = new int[] {
+                0, 0, 0, 0,
+                1, 1,
+                2, 2, 2,
+                3, 3, 3,  // "past"...
+                4, 4, 4,
+                5, 5, 5,
+                6, 6, 6,
+                7, 7, 7};
+        String[] lines = new String[] {
+                "it is half ten",
+                "quarter twenty",
+                "five minutes to",
+                "past one three",
+                "two four five",
+                "six seven eight",
+                "nine ten eleven",
+                "twelve am pm",
+        };
+
+
         @Override
         public void onDraw(Canvas canvas, Rect bounds) {
-            canvas.drawText("hello, wear!", 10, 100, textPaint);
+            mTime.setToNow();
+
+            // After this, mTime.minute will be 0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, or 55.
+            // 0-4 is mapped to 4, etc. That seems better than rounding, because if you're
+            // wondering if something that starts 10:00 has already started, then "10:00" will
+            // mean that it's at least ten. With rounding (57.5-2.5 -> 0) this wouldn't work.
+            mTime.minute -= mTime.minute % 5;
+
+            int mask = IT | IS;
+
+            if (mTime.minute > 30) {
+                mTime.minute = 30 - mTime.minute;
+                mask |= TO;
+                mTime.hour++;
+            } else if (mTime.minute != 0)
+                mask |= PAST;
+            switch (mTime.minute) {
+                case 5: mask |= FIVE_H; break;
+                case 10: mask |= TEN_H; break;
+                case 15: mask |= QUARTER; break;
+                case 20: mask |= TWENTY_H; break;
+                case 25: mask |= TWENTY_H | FIVE_H; break;
+                case 30: mask |= HALF; break;
+            }
+
+            mask |= mTime.hour < 12 ? AM : PM;
+            mTime.hour %= 12;
+            if (mTime.hour == 0)
+                mask |= TWELVE;
+            else if (mTime.hour == 2)
+                mask |= TWO;
+            else if (mTime.hour == 3)
+                mask |= THREE;
+            else
+                mask |= ONE << (mTime.hour - 1);
+
+            // XXX docs say this, which is incorrect:
+            //if (!mAmbient) {
+            if (!isInAmbientMode()) {
+                // XXX draw grey text thingies
+            }
+
+            int x = 20;
+            int y = 80;
+            //for (int i = 0; i < lines.length; i++, y += 0.5*textPaint.getFontSpacing())
+            //    canvas.drawText(lines[i], x, y, textPaint);
+            for (int i = 0; i < words.length; i++) {
+                canvas.drawText(
+                        words[i],
+                        x + xCoords[i],
+                        (int) (y + yCoords[i] * 0.5 * lightPaint.getFontSpacing()),
+                        (mask & (1 << i)) != 0 ? lightPaint : darkPaint);
+            }
         }
 
         @Override
