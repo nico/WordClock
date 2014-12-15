@@ -5,6 +5,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.support.wearable.watchface.CanvasWatchFaceService;
@@ -36,10 +38,15 @@ public class WordClockService extends CanvasWatchFaceService {
             }
         };
 
+        Paint textPaint;
+
         @Override
         public void onCreate(SurfaceHolder holder) {
             super.onCreate(holder);
             mTime = new Time();
+
+            textPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+            textPaint.setColor(Color.WHITE);
             /*
             XXX play with this
             setWatchFaceStyle(new WatchFaceStyle.Builder(AnalogWatchFaceService.this)
@@ -64,6 +71,9 @@ public class WordClockService extends CanvasWatchFaceService {
             // to avoid pixel burn-in."
             //mBurnInProtection = properties.getBoolean(PROPERTY_BURN_IN_PROTECTION,
             //        false);
+            // XXX setStatusBarGravity() ?
+            // XXX setHotwordIndicatorGravity() ?
+            // XXX setViewProtection() ?
         }
 
         @Override
@@ -95,7 +105,7 @@ public class WordClockService extends CanvasWatchFaceService {
 
         @Override
         public void onDraw(Canvas canvas, Rect bounds) {
-            /* draw your watch face */
+            canvas.drawText("hello, wear!", 10, 100, textPaint);
         }
 
         @Override
