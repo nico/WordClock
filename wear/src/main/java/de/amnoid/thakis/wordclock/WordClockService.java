@@ -188,7 +188,7 @@ public class WordClockService extends CanvasWatchFaceService {
             int mask = IT | IS;
 
             if (mTime.minute > 30) {
-                mTime.minute = 30 - mTime.minute;
+                mTime.minute = 60 - mTime.minute;
                 mask |= TO;
                 mTime.hour++;
             } else if (mTime.minute != 0)
