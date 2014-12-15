@@ -88,12 +88,13 @@ public class WordClockService extends CanvasWatchFaceService {
             mDarkPaint = new Paint(mLightPaint);
             mDarkPaint.setColor(Color.DKGRAY);
 
-            // XXX this is ignored? at least in the emulator
+            // This seems to be ignored in the emulator, but seems to mostly works on the device.
             setWatchFaceStyle(new WatchFaceStyle.Builder(WordClockService.this)
                     .setCardPeekMode(WatchFaceStyle.PEEK_MODE_SHORT)
                     .setBackgroundVisibility(WatchFaceStyle
                             .BACKGROUND_VISIBILITY_INTERRUPTIVE)
                     .setStatusBarGravity(Gravity.RIGHT | Gravity.TOP)
+                    .setHotwordIndicatorGravity(Gravity.RIGHT | Gravity.BOTTOM)
                     .setShowSystemUiTime(false)
                     .build());
         }
