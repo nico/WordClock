@@ -10,6 +10,8 @@ import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.Typeface;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.support.wearable.watchface.CanvasWatchFaceService;
 import android.support.wearable.watchface.WatchFaceStyle;
 import android.text.format.Time;
@@ -51,9 +53,34 @@ public class WordClockService extends CanvasWatchFaceService {
 
     /* implement service callback methods */
     private class Engine extends CanvasWatchFaceService.Engine {
+        private static final int MSG_UPDATE_TIME = 1;
+
         private Time mTime;
         private boolean mLowBitAmbient;
         private boolean mBurnInProtection;
+
+        // onTimeTick() is only called in ambient mode, so it can't be used to drive the watch.
+        // Install a timer that fires every 5 minutes and use it to drive the watch in all modes
+        // and ignore onTimeTick().
+        final Handler mUpdateTimeHandler = new Handler() {
+            @Override
+            public void handleMessage(Message message) {
+                if (message.what != MSG_UPDATE_TIME) return;
+
+                invalidate();
+                if (shouldTimerBeRunning()) {
+                    // Set next timer to the next round multiple of 5 min, and then some.
+                    Time time = new Time();
+                    time.setToNow();
+                    long nowMs = time.toMillis(false);
+                    time.minute += 5 - time.minute % 5;
+                    time.second = 1;
+                    long delayMs = time.toMillis(false) - nowMs;
+                    mUpdateTimeHandler
+                            .sendEmptyMessageDelayed(MSG_UPDATE_TIME, delayMs);
+                }
+            }
+        };
 
         boolean mRegisteredTimeZoneReceiver = false;
         final BroadcastReceiver mTimeZoneReceiver = new BroadcastReceiver() {
@@ -114,6 +141,17 @@ public class WordClockService extends CanvasWatchFaceService {
                     .build());
         }
 
+        private void updateTimer() {
+            mUpdateTimeHandler.removeMessages(MSG_UPDATE_TIME);
+            if (shouldTimerBeRunning()) {
+                mUpdateTimeHandler.sendEmptyMessage(MSG_UPDATE_TIME);
+            }
+        }
+
+        private boolean shouldTimerBeRunning() {
+            return isVisible();
+        }
+
         @Override
         public void onPropertiesChanged(Bundle properties) {
             super.onPropertiesChanged(properties);
@@ -130,9 +168,8 @@ public class WordClockService extends CanvasWatchFaceService {
         @Override
         public void onTimeTick() {
             super.onTimeTick();
-
-            // XXX enough to do this every 5 min
-            invalidate();
+            // NOTE: This is only called in ambient mode, so don't do anything here that should
+            // happen in interactive mode too.
         }
 
         @Override
@@ -195,7 +232,6 @@ public class WordClockService extends CanvasWatchFaceService {
 
         @Override
         public void onDraw(Canvas canvas, Rect bounds) {
-            // XXX: early return if nothing changed; a real paint is only needed every 5 minutes.
             mTime.setToNow();
 
             // After this, mTime.minute will be 0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, or 55.
@@ -243,7 +279,7 @@ public class WordClockService extends CanvasWatchFaceService {
                 for (int i = 0; i < words.length; i++) {
                     if ((mask & (1 << i)) != 0) continue;
 
-                    canvas.drawText( words[i], x + xCoords[i], y + yCoords[i], mDarkPaint);
+                    canvas.drawText(words[i], x + xCoords[i], y + yCoords[i], mDarkPaint);
                 }
             }
 
@@ -256,6 +292,8 @@ public class WordClockService extends CanvasWatchFaceService {
 
         @Override
         public void onVisibilityChanged(boolean visible) {
+            super.onVisibilityChanged(visible);
+
             if (visible) {
                 registerReceiver();
 
@@ -265,6 +303,8 @@ public class WordClockService extends CanvasWatchFaceService {
             } else {
                 unregisterReceiver();
             }
+
+            updateTimer();
         }
 
         private void registerReceiver() {
