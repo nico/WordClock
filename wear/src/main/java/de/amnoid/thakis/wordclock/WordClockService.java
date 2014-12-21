@@ -60,8 +60,8 @@ public class WordClockService extends CanvasWatchFaceService {
         private boolean mBurnInProtection;
 
         // onTimeTick() is only called in ambient mode, so it can't be used to drive the watch.
-        // Install a timer that fires every 5 minutes and use it to drive the watch in all modes
-        // and ignore onTimeTick().
+        // Install a timer that fires every 5 minutes and use it to drive the watch in interactive
+        // mode.
         final Handler mUpdateTimeHandler = new Handler() {
             @Override
             public void handleMessage(Message message) {
@@ -149,7 +149,7 @@ public class WordClockService extends CanvasWatchFaceService {
         }
 
         private boolean shouldTimerBeRunning() {
-            return isVisible();
+            return isVisible() && !isInAmbientMode();
         }
 
         @Override
@@ -167,9 +167,13 @@ public class WordClockService extends CanvasWatchFaceService {
 
         @Override
         public void onTimeTick() {
+            // NOTE: This is only called in ambient mode.
             super.onTimeTick();
-            // NOTE: This is only called in ambient mode, so don't do anything here that should
-            // happen in interactive mode too.
+
+            // TODO: onTimeTick() is called every minute, but the watch face only changes
+            // appearance every 5 minutes. Only call this when the face would actually draw
+            // something new.
+            invalidate();
         }
 
         @Override
@@ -187,6 +191,7 @@ public class WordClockService extends CanvasWatchFaceService {
                 mDarkPaint.setStyle(fill ? Paint.Style.FILL : Paint.Style.STROKE);
             }
             invalidate();
+            updateTimer();
         }
 
         String[] words = new String[] {
