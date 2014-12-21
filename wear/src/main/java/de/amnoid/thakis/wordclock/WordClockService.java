@@ -174,22 +174,19 @@ public class WordClockService extends CanvasWatchFaceService {
 
         @Override
         public void onAmbientModeChanged(boolean inAmbientMode) {
-            boolean wasInAmbientMode = isInAmbientMode();
             super.onAmbientModeChanged(inAmbientMode);
 
-            if (inAmbientMode != wasInAmbientMode) {
-                if (mLowBitAmbient) {
-                    boolean antiAlias = !inAmbientMode;
-                    mLightPaint.setAntiAlias(antiAlias);
-                    mDarkPaint.setAntiAlias(antiAlias);
-                }
-                if (mBurnInProtection) {
-                    boolean fill = !inAmbientMode;
-                    mLightPaint.setStyle(fill ? Paint.Style.FILL : Paint.Style.STROKE);
-                    mDarkPaint.setStyle(fill ? Paint.Style.FILL : Paint.Style.STROKE);
-                }
-                invalidate();
+            if (mLowBitAmbient) {
+                boolean antiAlias = !inAmbientMode;
+                mLightPaint.setAntiAlias(antiAlias);
+                mDarkPaint.setAntiAlias(antiAlias);
             }
+            if (mBurnInProtection) {
+                boolean fill = !inAmbientMode;
+                mLightPaint.setStyle(fill ? Paint.Style.FILL : Paint.Style.STROKE);
+                mDarkPaint.setStyle(fill ? Paint.Style.FILL : Paint.Style.STROKE);
+            }
+            invalidate();
         }
 
         String[] words = new String[] {
