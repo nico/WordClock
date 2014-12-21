@@ -8,7 +8,7 @@ android {
         applicationId "de.amnoid.thakis.wordclock"
         minSdkVersion 18
         targetSdkVersion 21
-        versionCode 4
+        versionCode 5
         versionName "1.0.1"
     }
     buildTypes {
