@@ -25,11 +25,9 @@
             <meta-data
                 android:name="com.google.android.wearable.watchface.preview"
                 android:resource="@drawable/preview_word_clock" />
-            <!-- XXX add circular screenshot once circular layout is done -->
-            <!--
             <meta-data
                 android:name="com.google.android.wearable.watchface.preview_circular"
-                android:resource="@drawable/preview_word_clock_circular" />-->
+                android:resource="@drawable/preview_word_clock_circular" />
             <intent-filter>
                 <action android:name="android.service.wallpaper.WallpaperService" />
                 <category
